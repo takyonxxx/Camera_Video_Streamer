@@ -219,14 +219,14 @@ extension CameraController: AVCaptureVideoDataOutputSampleBufferDelegate {
             CVPixelBufferLockBaseAddress(pixelBuffer, CVPixelBufferLockFlags(rawValue: 0))
             
             let bytesPerRow = CVPixelBufferGetBytesPerRow(pixelBuffer)
-            //let height = CVPixelBufferGetHeight(pixelBuffer)
+            let height = CVPixelBufferGetHeight(pixelBuffer)
             let src_buff = CVPixelBufferGetBaseAddress(pixelBuffer)
-            //let data = NSData(bytes: src_buff, length: bytesPerRow * height) as Data
-            let dataRow = NSData(bytes: src_buff, length: bytesPerRow * 1) as Data
+            let data = NSData(bytes: src_buff, length: bytesPerRow * height) as Data
+            //let dataRow = NSData(bytes: src_buff, length: bytesPerRow * 1) as Data
             
-            self.sendUDP(dataRow)
+            //self.sendUDP(dataRow)
             
-            /*let dataLen = data.count
+            let dataLen = data.count
             let chunkSize = 1024
             let fullChunks = Int(dataLen / chunkSize)
             let totalChunks = fullChunks + (dataLen % 1024 != 0 ? 1 : 0)
@@ -245,7 +245,8 @@ extension CameraController: AVCaptureVideoDataOutputSampleBufferDelegate {
                 self.sendUDP(chunk)
              }
           
-            //let dataToSend: Data? = "Test Stream".data(using: .utf8)*/
+            //let dataToSend: Data? = "Test Stream".data(using: .utf8)
+            //self.sendUDP(dataToSend!)
             
             CVPixelBufferUnlockBaseAddress(pixelBuffer, CVPixelBufferLockFlags(rawValue: 0))
             
