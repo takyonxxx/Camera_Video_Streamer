@@ -202,6 +202,54 @@ if (lock == kCVReturnSuccess) {
 
 */
 
+extension UIImage {
+    /// Get the pixel color at a point in the image
+    func pixelColor(atLocation point: CGPoint) -> UIColor? {
+        guard let cgImage = cgImage, let pixelData = cgImage.dataProvider?.data else { return nil }
+        
+        let data: UnsafePointer<UInt8> = CFDataGetBytePtr(pixelData)
+        
+        let bytesPerPixel = cgImage.bitsPerPixel / 8
+        
+        let pixelInfo: Int = ((cgImage.bytesPerRow * Int(point.y)) + (Int(point.x) * bytesPerPixel))
+        
+        let b = CGFloat(data[pixelInfo]) / CGFloat(255.0)
+        let g = CGFloat(data[pixelInfo+1]) / CGFloat(255.0)
+        let r = CGFloat(data[pixelInfo+2]) / CGFloat(255.0)
+        let a = CGFloat(data[pixelInfo+3]) / CGFloat(255.0)
+        
+        return UIColor(red: r, green: g, blue: b, alpha: a)
+    }
+}
+
+func toHexString(color: UIColor) -> String {
+    var r:CGFloat = 0
+    var g:CGFloat = 0
+    var b:CGFloat = 0
+    var a:CGFloat = 0
+    
+    if color.getRed(&r, green: &g, blue: &b, alpha: &a)
+    {
+        //let rgb:Int = (Int)(r*255)<<16 | (Int)(g*255)<<8 | (Int)(b*255)<<0
+        //return String(format:"#%06x", rgb)
+        //return String(format:"%0.6f %0.6f %0.6f %0.6f", r, g, b, a)
+        return String(format:"%06f %06f %06f %06f", r, g, b, a)
+    }
+    else
+    {
+        // Could not extract RGBA components:
+        return String(format:"%0.6f %0.6f %0.6f", 0,0,0,0)
+    }
+}
+
+private func imageFromSampleBuffer(sampleBuffer: CMSampleBuffer) -> UIImage? {
+    guard let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return nil }
+    let ciImage = CIImage(cvPixelBuffer: imageBuffer)
+    let context = CIContext()
+    guard let cgImage = context.createCGImage(ciImage, from: ciImage.extent) else { return nil }
+    return UIImage(cgImage: cgImage)
+}
+
 @available(iOS 12.0, *)
 extension CameraController: AVCaptureVideoDataOutputSampleBufferDelegate {
     
@@ -213,45 +261,50 @@ extension CameraController: AVCaptureVideoDataOutputSampleBufferDelegate {
             return
         }
         
+        guard let uiImage = imageFromSampleBuffer(sampleBuffer: sampleBuffer) else { return }
+        
+        
+        CVPixelBufferLockBaseAddress(pixelBuffer, CVPixelBufferLockFlags(rawValue: 0))
+        
+        let topLeft = CGPoint(x: 0, y: 0)
+        let col = uiImage.pixelColor(atLocation: topLeft)!
+        
         if(udpStart)
         {
-            
-            CVPixelBufferLockBaseAddress(pixelBuffer, CVPixelBufferLockFlags(rawValue: 0))
-            
-            let bytesPerRow = CVPixelBufferGetBytesPerRow(pixelBuffer)
-            let height = CVPixelBufferGetHeight(pixelBuffer)
-            let src_buff = CVPixelBufferGetBaseAddress(pixelBuffer)
-            let data = NSData(bytes: src_buff, length: bytesPerRow * height) as Data
-            //let dataRow = NSData(bytes: src_buff, length: bytesPerRow * 1) as Data
-            
-            //self.sendUDP(dataRow)
-            
-            let dataLen = data.count
-            let chunkSize = 1024
-            let fullChunks = Int(dataLen / chunkSize)
-            let totalChunks = fullChunks + (dataLen % 1024 != 0 ? 1 : 0)
-            
-            //var chunks:[Data] = [Data]()
-            for chunkCounter in 0..<totalChunks {
-                var chunk:Data
-                let chunkBase = chunkCounter * chunkSize
-                var diff = chunkSize
-                if(chunkCounter == totalChunks - 1) {
-                    diff = dataLen - chunkBase
-                }
-                
-                let range:Range<Data.Index> = Range<Data.Index>(chunkBase..<(chunkBase + diff))
-                chunk = data.subdata(in: range)
-                self.sendUDP(chunk)
-             }
-          
-            //let dataToSend: Data? = "Test Stream".data(using: .utf8)
-            //self.sendUDP(dataToSend!)
-            
-            CVPixelBufferUnlockBaseAddress(pixelBuffer, CVPixelBufferLockFlags(rawValue: 0))
-            
+            self.sendUDP(toHexString(color: col))
         }
+        
+        /*let bytesPerRow = CVPixelBufferGetBytesPerRow(pixelBuffer)
+        let height = CVPixelBufferGetHeight(pixelBuffer)
+        let src_buff = CVPixelBufferGetBaseAddress(pixelBuffer)
+        let data = NSData(bytes: src_buff, length: bytesPerRow * height) as Data
+        //let dataRow = NSData(bytes: src_buff, length: bytesPerRow * 1) as Data
        
+        let dataLen = data.count
+        let chunkSize = 1024
+        let fullChunks = Int(dataLen / chunkSize)
+        let totalChunks = fullChunks + (dataLen % 1024 != 0 ? 1 : 0)
+        
+        //var chunks:[Data] = [Data]()
+        for chunkCounter in 0..<totalChunks {
+            var chunk:Data
+            let chunkBase = chunkCounter * chunkSize
+            var diff = chunkSize
+            if(chunkCounter == totalChunks - 1) {
+                diff = dataLen - chunkBase
+            }
+            
+            let range:Range<Data.Index> = Range<Data.Index>(chunkBase..<(chunkBase + diff))
+            chunk = data.subdata(in: range)
+            
+            if(udpStart)
+            self.sendUDP(chunk)
+        }
+        
+        //let dataToSend: Data? = "Test Stream".data(using: .utf8)
+        //self.sendUDP(dataToSend!)*/
+        
+        CVPixelBufferUnlockBaseAddress(pixelBuffer, CVPixelBufferLockFlags(rawValue: 0))
     }
 }
 
