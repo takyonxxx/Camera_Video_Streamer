@@ -6,16 +6,20 @@ import Network
 @available(iOS 12.0, *)
 class CameraController: UIViewController {
 
-    @IBOutlet var messageLabel:UILabel!
-    @IBOutlet var topbar: UIView!
     
     @IBOutlet weak var textHost: UITextField!
     @IBOutlet weak var textPort: UITextField!
     
+    @IBOutlet weak var labelInfo: UILabel!
     @IBOutlet weak var labelIP: UILabel!
-    @IBOutlet weak var labelPort: UILabel!
+    
+    @IBOutlet weak var labelPort: UILabel!   
+
+    @IBOutlet weak var labelCalc: UILabel!
     
     @IBOutlet weak var buttonStartStreaming: UIButton!
+    
+    @IBOutlet weak var buttonExit: UIButton!
     
     var captureSession = AVCaptureSession()
     
@@ -27,6 +31,11 @@ class CameraController: UIViewController {
     var portUDP: NWEndpoint.Port = 0
     var udpStart = false
     
+    @IBAction func onclick_exit(_ sender: Any)
+    {
+        exit(0)
+    }
+    
     @IBAction func onclick_streaming(_ sender: Any)
     {
         let title = (sender as AnyObject).title(for: .normal)
@@ -34,7 +43,7 @@ class CameraController: UIViewController {
         hostUDP = NWEndpoint.Host(textHost.text!)
         portUDP = NWEndpoint.Port(integerLiteral: UInt16(textPort.text!)!)
         
-        if(title == "Connect")
+        if(title == "Send")
         {
             connectToUDP(hostUDP,portUDP)
             (sender as AnyObject).setTitle("Disconnect", for: .normal)
@@ -43,7 +52,7 @@ class CameraController: UIViewController {
         {
             udpStart = false;
             self.connection?.cancelCurrentEndpoint()
-            (sender as AnyObject).setTitle("Connect", for: .normal)
+            (sender as AnyObject).setTitle("Send", for: .normal)
         }
     }
     
@@ -113,13 +122,14 @@ class CameraController: UIViewController {
         captureSession.startRunning()
         
         // Move the message label and top bar to the front
-        view.bringSubview(toFront: messageLabel)
-        view.bringSubview(toFront: topbar)
+        view.bringSubview(toFront: labelInfo)
+        view.bringSubview(toFront: labelCalc)
         view.bringSubview(toFront: textHost)
         view.bringSubview(toFront: textPort)
         view.bringSubview(toFront: labelIP)
         view.bringSubview(toFront: labelPort)
         view.bringSubview(toFront: buttonStartStreaming)
+        view.bringSubview(toFront: buttonExit)
         
         // Initialize QR Code Frame to highlight the QR code
         qrCodeFrameView = UIView()
@@ -222,7 +232,7 @@ extension UIImage {
     }
 }
 
-func toHexString(color: UIColor) -> String {
+func toColorString(color: UIColor) -> String {
     var r:CGFloat = 0
     var g:CGFloat = 0
     var b:CGFloat = 0
@@ -271,7 +281,8 @@ extension CameraController: AVCaptureVideoDataOutputSampleBufferDelegate {
         
         if(udpStart)
         {
-            self.sendUDP(toHexString(color: col))
+            self.sendUDP(toColorString(color: col))
+            //labelInfo.text = toColorString(color: col)
         }
         
         /*let bytesPerRow = CVPixelBufferGetBytesPerRow(pixelBuffer)
@@ -316,7 +327,6 @@ extension CameraController: AVCaptureMetadataOutputObjectsDelegate {
         if metadataObjects.count == 0 {
             qrCodeFrameView?.frame = CGRect.zero
             //messageLabel.text = "No QR code is detected"
-            udpStart = false;
             return
         }
         
@@ -330,7 +340,7 @@ extension CameraController: AVCaptureMetadataOutputObjectsDelegate {
             
             if metadataObj.stringValue != nil {
                 launchApp(decodedURL: metadataObj.stringValue!)
-                messageLabel.text = metadataObj.stringValue
+                labelInfo.text = metadataObj.stringValue
             }
         }
     }

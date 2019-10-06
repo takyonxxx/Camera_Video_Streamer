@@ -7,24 +7,23 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2DF3F548234A5DC6007483EC /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2DF3F547234A5DC6007483EC /* Main.storyboard */; };
+		2DF3F54A234A603B007483EC /* CameraController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DF3F549234A603B007483EC /* CameraController.swift */; };
+		2DF3F54C234A6504007483EC /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DF3F54B234A6503007483EC /* ViewController.swift */; };
 		F4F09DB71DAF669400026BB2 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4F09DB61DAF669400026BB2 /* AppDelegate.swift */; };
-		F4F09DBC1DAF669400026BB2 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F4F09DBA1DAF669400026BB2 /* Main.storyboard */; };
 		F4F09DBE1DAF669400026BB2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F4F09DBD1DAF669400026BB2 /* Assets.xcassets */; };
 		F4F09DC11DAF669400026BB2 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F4F09DBF1DAF669400026BB2 /* LaunchScreen.storyboard */; };
-		F4F09DC91DAF6A3800026BB2 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4F09DC81DAF6A3800026BB2 /* ViewController.swift */; };
-		F4F09DCB1DAF6A4F00026BB2 /* CameraController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4F09DCA1DAF6A4F00026BB2 /* CameraController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		2D8E2CD82291C08600E783BA /* RawCamera copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "RawCamera copy-Info.plist"; path = "/Users/tbiliyor/Desktop/RawCamera/RawCamera copy-Info.plist"; sourceTree = "<absolute>"; };
+		2DF3F547234A5DC6007483EC /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
+		2DF3F549234A603B007483EC /* CameraController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraController.swift; sourceTree = "<group>"; };
+		2DF3F54B234A6503007483EC /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		F4F09DB31DAF669400026BB2 /* RawCamera.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RawCamera.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F4F09DB61DAF669400026BB2 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		F4F09DBB1DAF669400026BB2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		F4F09DBD1DAF669400026BB2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F4F09DC01DAF669400026BB2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		F4F09DC21DAF669400026BB2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		F4F09DC81DAF6A3800026BB2 /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
-		F4F09DCA1DAF6A4F00026BB2 /* CameraController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -43,7 +42,6 @@
 			children = (
 				F4F09DB51DAF669400026BB2 /* RawCamera */,
 				F4F09DB41DAF669400026BB2 /* Products */,
-				2D8E2CD82291C08600E783BA /* RawCamera copy-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -58,13 +56,13 @@
 		F4F09DB51DAF669400026BB2 /* RawCamera */ = {
 			isa = PBXGroup;
 			children = (
+				2DF3F547234A5DC6007483EC /* Main.storyboard */,
 				F4F09DB61DAF669400026BB2 /* AppDelegate.swift */,
-				F4F09DBA1DAF669400026BB2 /* Main.storyboard */,
 				F4F09DBD1DAF669400026BB2 /* Assets.xcassets */,
 				F4F09DBF1DAF669400026BB2 /* LaunchScreen.storyboard */,
 				F4F09DC21DAF669400026BB2 /* Info.plist */,
-				F4F09DC81DAF6A3800026BB2 /* ViewController.swift */,
-				F4F09DCA1DAF6A4F00026BB2 /* CameraController.swift */,
+				2DF3F54B234A6503007483EC /* ViewController.swift */,
+				2DF3F549234A603B007483EC /* CameraController.swift */,
 			);
 			path = RawCamera;
 			sourceTree = "<group>";
@@ -130,9 +128,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2DF3F548234A5DC6007483EC /* Main.storyboard in Resources */,
 				F4F09DC11DAF669400026BB2 /* LaunchScreen.storyboard in Resources */,
 				F4F09DBE1DAF669400026BB2 /* Assets.xcassets in Resources */,
-				F4F09DBC1DAF669400026BB2 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -143,23 +141,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F4F09DC91DAF6A3800026BB2 /* ViewController.swift in Sources */,
+				2DF3F54C234A6504007483EC /* ViewController.swift in Sources */,
+				2DF3F54A234A603B007483EC /* CameraController.swift in Sources */,
 				F4F09DB71DAF669400026BB2 /* AppDelegate.swift in Sources */,
-				F4F09DCB1DAF6A4F00026BB2 /* CameraController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		F4F09DBA1DAF669400026BB2 /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				F4F09DBB1DAF669400026BB2 /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
 		F4F09DBF1DAF669400026BB2 /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
