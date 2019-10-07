@@ -4,7 +4,7 @@ import AVFoundation
 import Network
 
 @available(iOS 12.0, *)
-class CameraController: UIViewController {
+class CameraController: UIViewController , UITextFieldDelegate {
 
     
     @IBOutlet weak var textHost: UITextField!
@@ -12,13 +12,11 @@ class CameraController: UIViewController {
     
     @IBOutlet weak var labelInfo: UILabel!
     @IBOutlet weak var labelIP: UILabel!
-    
-    @IBOutlet weak var labelPort: UILabel!   
-
     @IBOutlet weak var labelCalc: UILabel!
+    @IBOutlet weak var labelPort: UILabel!
     
-    @IBOutlet weak var buttonStartStreaming: UIButton!
-    
+    @IBOutlet weak var buttonStreaming: UIButton!
+    @IBOutlet weak var buttonFlash: UIButton!
     @IBOutlet weak var buttonExit: UIButton!
     
     var captureSession = AVCaptureSession()
@@ -31,29 +29,52 @@ class CameraController: UIViewController {
     var portUDP: NWEndpoint.Port = 0
     var udpStart = false
     
+    
+    @IBAction func onclick_flash(_ sender: Any)
+    {
+        let title = (sender as AnyObject).title(for: .normal)
+        if(title == "Flash On")
+        {
+            (sender as AnyObject).setTitle("Flash Off", for: .normal)
+        }
+        else
+        {
+            (sender as AnyObject).setTitle("Flash On", for: .normal)
+        }
+        
+        toggleTorch()
+    }
+    
+    @IBAction func onclick_streaming(_ sender: Any)
+    {
+       let title = (sender as AnyObject).title(for: .normal)
+       
+       
+       hostUDP = NWEndpoint.Host(textHost.text!)
+       portUDP = NWEndpoint.Port(integerLiteral: UInt16(textPort.text!)!)
+       
+       if(title == "Send")
+       {
+           connectToUDP(hostUDP,portUDP)
+           (sender as AnyObject).setTitle("Disconnect", for: .normal)
+       }
+       else
+       {
+           udpStart = false;
+           self.connection?.cancelCurrentEndpoint()
+           (sender as AnyObject).setTitle("Send", for: .normal)
+       }
+    }
+    
     @IBAction func onclick_exit(_ sender: Any)
     {
         exit(0)
     }
     
-    @IBAction func onclick_streaming(_ sender: Any)
-    {
-        let title = (sender as AnyObject).title(for: .normal)
-        
-        hostUDP = NWEndpoint.Host(textHost.text!)
-        portUDP = NWEndpoint.Port(integerLiteral: UInt16(textPort.text!)!)
-        
-        if(title == "Send")
-        {
-            connectToUDP(hostUDP,portUDP)
-            (sender as AnyObject).setTitle("Disconnect", for: .normal)
-        }
-        else
-        {
-            udpStart = false;
-            self.connection?.cancelCurrentEndpoint()
-            (sender as AnyObject).setTitle("Send", for: .normal)
-        }
+    //Calls this function when the tap is recognized.
+    @objc func dismissKeyboard() {
+    //Causes the view (or one of its embedded text fields) to resign the first responder status.
+        view.endEditing(true)
     }
     
     private let supportedCodeTypes = [AVMetadataObject.ObjectType.upce,
@@ -70,11 +91,20 @@ class CameraController: UIViewController {
                                       AVMetadataObject.ObjectType.interleaved2of5,
                                       AVMetadataObject.ObjectType.qr]
    
-    override func viewDidLoad() {
+    override func viewDidLoad()
+    {
         super.viewDidLoad()
         
         textHost.text = getIPAddressForCellOrWireless()
         
+        labelCalc.numberOfLines = 0;
+        textPort.keyboardType = .numberPad
+        textHost.delegate = self
+
+        //Looks for single or multiple taps.
+        let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(UIInputViewController.dismissKeyboard))
+        view.addGestureRecognizer(tap)
+
         guard let captureDevice = AVCaptureDevice.default(for: AVMediaType.video) else {
             fatalError("Failed to get the camera device")
         }
@@ -122,13 +152,14 @@ class CameraController: UIViewController {
         captureSession.startRunning()
         
         // Move the message label and top bar to the front
-        view.bringSubview(toFront: labelInfo)
-        view.bringSubview(toFront: labelCalc)
         view.bringSubview(toFront: textHost)
         view.bringSubview(toFront: textPort)
+        view.bringSubview(toFront: labelInfo)
         view.bringSubview(toFront: labelIP)
         view.bringSubview(toFront: labelPort)
-        view.bringSubview(toFront: buttonStartStreaming)
+        view.bringSubview(toFront: labelCalc)
+        view.bringSubview(toFront: buttonStreaming)
+        view.bringSubview(toFront: buttonFlash)
         view.bringSubview(toFront: buttonExit)
         
         // Initialize QR Code Frame to highlight the QR code
@@ -141,14 +172,23 @@ class CameraController: UIViewController {
             view.bringSubview(toFront: qrCodeFrameView)
         }
     }
-
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
     
-    // MARK: - Helper methods
-
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool
+    {
+        //For ip numer validation
+        if textField == textHost {
+            let allowedCharacters = CharacterSet(charactersIn:".0123456789")
+            let characterSet = CharacterSet(charactersIn: string)
+            return allowedCharacters.isSuperset(of: characterSet)
+        }
+        return true
+    }
+    
     func launchApp(decodedURL: String) {
         
         if presentedViewController != nil {
@@ -172,45 +212,7 @@ class CameraController: UIViewController {
         
         present(alertPrompt, animated: true, completion: nil)
     }
-
 }
-
-/*
-
-CGRect cropRect = CGRectMake(50, 50, 100, 100); // cropRect
-CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
-CVReturn lock = CVPixelBufferLockBaseAddress(pixelBuffer, 0);
-if (lock == kCVReturnSuccess) {
-    int w = 0;
-    int h = 0;
-    int r = 0;
-    int bytesPerPixel = 0;
-    unsigned char *buffer;
-    w = CVPixelBufferGetWidth(pixelBuffer);
-    h = CVPixelBufferGetHeight(pixelBuffer);
-    r = CVPixelBufferGetBytesPerRow(pixelBuffer);
-    bytesPerPixel = r/w;
-    buffer = CVPixelBufferGetBaseAddress(pixelBuffer);
-    UIGraphicsBeginImageContext(cropRect.size); // create context for image storage, use cropRect as size
-    CGContextRef c = UIGraphicsGetCurrentContext();
-    unsigned char* data = CGBitmapContextGetData(c);
-    if (data != NULL) {
-        // iterate over the pixels in cropRect
-        for(int y = cropRect.origin.y, yDest = 0; y<CGRectGetMaxY(cropRect); y++, yDest++) { 
-            for(int x = cropRect.origin.x, xDest = 0; x<CGRectGetMaxX(cropRect); x++, xDest++) {
-                int offset = bytesPerPixel*((w*y)+x); // offset calculation in cropRect
-                int offsetDest = bytesPerPixel*((cropRect.size.width*yDest)+xDest); // offset calculation for destination image
-                for (int i = 0; i<bytesPerPixel; i++) {
-                    data[offsetDest+i]   = buffer[offset+i];
-                }
-            }
-        }
-    } 
-    UIImage *img = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-}
-
-*/
 
 extension UIImage {
     /// Get the pixel color at a point in the image
@@ -232,32 +234,31 @@ extension UIImage {
     }
 }
 
-func toColorString(color: UIColor) -> String {
-    var r:CGFloat = 0
-    var g:CGFloat = 0
-    var b:CGFloat = 0
-    var a:CGFloat = 0
-    
-    if color.getRed(&r, green: &g, blue: &b, alpha: &a)
-    {
-        //let rgb:Int = (Int)(r*255)<<16 | (Int)(g*255)<<8 | (Int)(b*255)<<0
-        //return String(format:"#%06x", rgb)
-        //return String(format:"%0.6f %0.6f %0.6f %0.6f", r, g, b, a)
-        return String(format:"%06f %06f %06f %06f", r, g, b, a)
-    }
-    else
-    {
-        // Could not extract RGBA components:
-        return String(format:"%0.6f %0.6f %0.6f", 0,0,0,0)
-    }
-}
-
 private func imageFromSampleBuffer(sampleBuffer: CMSampleBuffer) -> UIImage? {
     guard let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return nil }
     let ciImage = CIImage(cvPixelBuffer: imageBuffer)
     let context = CIContext()
     guard let cgImage = context.createCGImage(ciImage, from: ciImage.extent) else { return nil }
     return UIImage(cgImage: cgImage)
+}
+
+func toggleTorch() {
+    guard let device = AVCaptureDevice.default(for: AVMediaType.video) else { return }
+    guard device.hasTorch else { print("Torch isn't available"); return }
+
+    do {
+        try device.lockForConfiguration()
+        if (device.torchMode == .on) {
+            device.torchMode = .off
+        } else {
+            device.torchMode = .on
+            try device.setTorchModeOn(level: AVCaptureDevice.maxAvailableTorchLevel)
+        }
+        device.unlockForConfiguration()
+    } catch
+    {
+        print("Torch can't be used")
+    }
 }
 
 @available(iOS 12.0, *)
@@ -271,19 +272,71 @@ extension CameraController: AVCaptureVideoDataOutputSampleBufferDelegate {
             return
         }
         
-        guard let uiImage = imageFromSampleBuffer(sampleBuffer: sampleBuffer) else { return }
-        
-        
+        guard let uiImage = imageFromSampleBuffer(sampleBuffer: sampleBuffer) else {
+            return
+        }
+                
         CVPixelBufferLockBaseAddress(pixelBuffer, CVPixelBufferLockFlags(rawValue: 0))
+    
+        // get the average red green and blue values from the image
+        var r:CGFloat = 0
+        var g:CGFloat = 0
+        var b:CGFloat = 0
+        var a:CGFloat = 0
         
-        let topLeft = CGPoint(x: 0, y: 0)
-        let col = uiImage.pixelColor(atLocation: topLeft)!
+        var avrHue:CGFloat = 0
+        var avrR:CGFloat = 0
+        var avrG:CGFloat = 0
+        var avrB:CGFloat = 0
+        
+        var h: CGFloat = 0
+        var s: CGFloat = 0
+        var br: CGFloat = 0
+        
+        let pixelsWide = Int(uiImage.size.width)
+        let pixelsHigh = Int(uiImage.size.height)
+        
+        for x in 0..<pixelsWide
+        {
+            for y in 0..<pixelsHigh
+            {
+                let point = CGPoint(x: x, y: y)
+                let color = uiImage.pixelColor(atLocation: point)!
+                
+                if color.getRed(&r, green: &g, blue: &b, alpha: &a)
+                {
+                    avrR += r
+                    avrG += g
+                    avrB += b
+                    
+                    if color.getHue(&h, saturation: &s, brightness: &br, alpha: nil)
+                    {
+                        avrHue += h
+                    }
+                }
+            }
+        }
+            
+        avrHue/=(CGFloat) (pixelsWide*pixelsHigh);
+        avrR/=(CGFloat) (pixelsWide*pixelsHigh);
+        avrG/=(CGFloat) (pixelsWide*pixelsHigh);
+        avrB/=(CGFloat) (pixelsWide*pixelsHigh);
         
         if(udpStart)
         {
-            self.sendUDP(toColorString(color: col))
-            //labelInfo.text = toColorString(color: col)
+           self.sendUDP(String(format:"%0.6f %0.6f %0.6f %0.6f", avrHue, avrR, avrG, avrB))
         }
+        
+        DispatchQueue.global(qos: .background).async
+        {
+            DispatchQueue.main.async
+            {
+                let text:String = String(format:"H: %0.4f", avrHue)
+                self.labelCalc.text = text
+            }
+        }
+        
+        CVPixelBufferUnlockBaseAddress(pixelBuffer, CVPixelBufferLockFlags(rawValue: 0))
         
         /*let bytesPerRow = CVPixelBufferGetBytesPerRow(pixelBuffer)
         let height = CVPixelBufferGetHeight(pixelBuffer)
@@ -314,8 +367,6 @@ extension CameraController: AVCaptureVideoDataOutputSampleBufferDelegate {
         
         //let dataToSend: Data? = "Test Stream".data(using: .utf8)
         //self.sendUDP(dataToSend!)*/
-        
-        CVPixelBufferUnlockBaseAddress(pixelBuffer, CVPixelBufferLockFlags(rawValue: 0))
     }
 }
 

@@ -94,22 +94,35 @@
                                 <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" alpha="0.59999999999999998" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="0" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="b5g-ci-CzZ">
-                                <rect key="frame" x="16" y="272" width="343" height="134"/>
+                            <label opaque="NO" userInteractionEnabled="NO" alpha="0.59999999999999998" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="-" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0O6-1K-8p2">
+                                <rect key="frame" x="16" y="249" width="343" height="134"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <color key="backgroundColor" red="0.43529411759999997" green="0.4431372549" blue="0.47450980390000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <fontDescription key="fontDescription" type="boldSystem" pointSize="100"/>
+                                <color key="backgroundColor" systemColor="systemRedColor" red="1" green="0.23137254901960785" blue="0.18823529411764706" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="50"/>
                                 <color key="textColor" systemColor="systemYellowColor" red="1" green="0.80000000000000004" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <color key="highlightedColor" red="0.43529411759999997" green="0.4431372549" blue="0.47450980390000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <nil key="highlightedColor"/>
                             </label>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="7nc-HL-dqB">
+                                <rect key="frame" x="132" y="405" width="111" height="37"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" white="0.33333333329999998" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="20"/>
+                                <state key="normal" title="Flash On">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
+                                <connections>
+                                    <action selector="onclick_flash:" destination="B0K-bi-dGX" eventType="touchUpInside" id="CCw-f9-sub"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <viewLayoutGuide key="safeArea" id="zQO-ow-7le"/>
                     </view>
                     <connections>
                         <outlet property="buttonExit" destination="uB3-HS-P0r" id="Txf-o4-Rer"/>
-                        <outlet property="buttonStartStreaming" destination="pRb-WP-13Q" id="pdh-Q2-H6L"/>
-                        <outlet property="labelCalc" destination="b5g-ci-CzZ" id="Hjm-4g-2rV"/>
+                        <outlet property="buttonFlash" destination="7nc-HL-dqB" id="ixt-2q-IeM"/>
+                        <outlet property="buttonStreaming" destination="pRb-WP-13Q" id="5Zd-As-7bH"/>
+                        <outlet property="labelCalc" destination="0O6-1K-8p2" id="Lp7-IZ-1Ms"/>
                         <outlet property="labelIP" destination="qC8-wx-1Zw" id="reF-ZF-80X"/>
                         <outlet property="labelInfo" destination="IpQ-6i-Tnc" id="15f-1h-0P8"/>
                         <outlet property="labelPort" destination="Vhv-hh-oE3" id="tyN-I8-gJW"/>
