@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2DAF2FBF234B655700AA32F4 /* KalmanFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DAF2FBE234B655700AA32F4 /* KalmanFilter.swift */; };
 		2DF3F548234A5DC6007483EC /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2DF3F547234A5DC6007483EC /* Main.storyboard */; };
 		2DF3F54A234A603B007483EC /* CameraController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DF3F549234A603B007483EC /* CameraController.swift */; };
 		2DF3F54C234A6504007483EC /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DF3F54B234A6503007483EC /* ViewController.swift */; };
@@ -16,6 +17,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		2DAF2FBE234B655700AA32F4 /* KalmanFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KalmanFilter.swift; sourceTree = "<group>"; };
 		2DF3F547234A5DC6007483EC /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		2DF3F549234A603B007483EC /* CameraController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraController.swift; sourceTree = "<group>"; };
 		2DF3F54B234A6503007483EC /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -63,6 +65,7 @@
 				F4F09DC21DAF669400026BB2 /* Info.plist */,
 				2DF3F54B234A6503007483EC /* ViewController.swift */,
 				2DF3F549234A603B007483EC /* CameraController.swift */,
+				2DAF2FBE234B655700AA32F4 /* KalmanFilter.swift */,
 			);
 			path = RawCamera;
 			sourceTree = "<group>";
@@ -144,6 +147,7 @@
 				2DF3F54C234A6504007483EC /* ViewController.swift in Sources */,
 				2DF3F54A234A603B007483EC /* CameraController.swift in Sources */,
 				F4F09DB71DAF669400026BB2 /* AppDelegate.swift in Sources */,
+				2DAF2FBF234B655700AA32F4 /* KalmanFilter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

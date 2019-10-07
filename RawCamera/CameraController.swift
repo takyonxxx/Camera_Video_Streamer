@@ -27,8 +27,13 @@ class CameraController: UIViewController , UITextFieldDelegate {
     var connection: NWConnection?
     var hostUDP: NWEndpoint.Host = ""
     var portUDP: NWEndpoint.Port = 0
-    var udpStart = false
+    var udpStart : Bool =  false
     
+    var KF_VAR_ACCEL : Double = 0.0075
+    var KF_VAR_MEASUREMENT : Double = 0.05
+    var kalmanFilter = KalmanFilter()
+    var start: DispatchTime = DispatchTime.now()
+    var end: DispatchTime = DispatchTime.now()
     
     @IBAction func onclick_flash(_ sender: Any)
     {
@@ -49,20 +54,17 @@ class CameraController: UIViewController , UITextFieldDelegate {
     {
        let title = (sender as AnyObject).title(for: .normal)
        
-       
        hostUDP = NWEndpoint.Host(textHost.text!)
        portUDP = NWEndpoint.Port(integerLiteral: UInt16(textPort.text!)!)
        
        if(title == "Send")
        {
-           connectToUDP(hostUDP,portUDP)
-           (sender as AnyObject).setTitle("Disconnect", for: .normal)
+            connectToUDP(hostUDP,portUDP)
        }
        else
        {
-           udpStart = false;
-           self.connection?.cancelCurrentEndpoint()
-           (sender as AnyObject).setTitle("Send", for: .normal)
+            udpStart = false;
+            self.connection?.cancelCurrentEndpoint()
        }
     }
     
@@ -100,6 +102,7 @@ class CameraController: UIViewController , UITextFieldDelegate {
         labelCalc.numberOfLines = 0;
         textPort.keyboardType = .numberPad
         textHost.delegate = self
+        kalmanFilter.start(x_accel: KF_VAR_ACCEL)
 
         //Looks for single or multiple taps.
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(UIInputViewController.dismissKeyboard))
@@ -144,10 +147,13 @@ class CameraController: UIViewController , UITextFieldDelegate {
         
         let videoOutput = AVCaptureVideoDataOutput()
         videoOutput.setSampleBufferDelegate(self as AVCaptureVideoDataOutputSampleBufferDelegate, queue: DispatchQueue(label: "sample buffer delegate", attributes: []))
+        // output format
+        videoOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA]
+        
         if captureSession.canAddOutput(videoOutput) {
             captureSession.addOutput(videoOutput)
         }
-        
+          
         // Start video capture.
         captureSession.startRunning()
         
@@ -268,6 +274,8 @@ extension CameraController: AVCaptureVideoDataOutputSampleBufferDelegate {
                                 didOutput sampleBuffer: CMSampleBuffer,
                                 from connection: AVCaptureConnection)
     {
+        self.end = DispatchTime.now()
+        
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
             return
         }
@@ -275,9 +283,10 @@ extension CameraController: AVCaptureVideoDataOutputSampleBufferDelegate {
         guard let uiImage = imageFromSampleBuffer(sampleBuffer: sampleBuffer) else {
             return
         }
-                
-        CVPixelBufferLockBaseAddress(pixelBuffer, CVPixelBufferLockFlags(rawValue: 0))
-    
+           
+        let pixelsWide = Int(uiImage.size.width)
+        let pixelsHigh = Int(uiImage.size.height)
+       
         // get the average red green and blue values from the image
         var r:CGFloat = 0
         var g:CGFloat = 0
@@ -293,9 +302,8 @@ extension CameraController: AVCaptureVideoDataOutputSampleBufferDelegate {
         var s: CGFloat = 0
         var br: CGFloat = 0
         
-        let pixelsWide = Int(uiImage.size.width)
-        let pixelsHigh = Int(uiImage.size.height)
-        
+        CVPixelBufferLockBaseAddress(pixelBuffer, CVPixelBufferLockFlags(rawValue: 0))
+            
         for x in 0..<pixelsWide
         {
             for y in 0..<pixelsHigh
@@ -321,19 +329,33 @@ extension CameraController: AVCaptureVideoDataOutputSampleBufferDelegate {
         avrR/=(CGFloat) (pixelsWide*pixelsHigh);
         avrG/=(CGFloat) (pixelsWide*pixelsHigh);
         avrB/=(CGFloat) (pixelsWide*pixelsHigh);
-        
-        if(udpStart)
+       
+        if(self.end >= self.start)
         {
-           self.sendUDP(String(format:"%0.6f %0.6f %0.6f %0.6f", avrHue, avrR, avrG, avrB))
-        }
-        
-        DispatchQueue.global(qos: .background).async
-        {
-            DispatchQueue.main.async
+            let nanoTime = self.end.uptimeNanoseconds - self.start.uptimeNanoseconds
+            let diff = Double(nanoTime) / 1000000000
+            let fps:Float = Float(1.0/diff)
+            self.kalmanFilter.Update(z_abs: Double(avrHue), var_z_abs: KF_VAR_MEASUREMENT, dt: diff)
+            
+            if(udpStart)
             {
-                let text:String = String(format:"H: %0.4f", avrHue)
-                self.labelCalc.text = text
+               self.sendUDP(String(format:"%0.6f:%0.6f:%0.6f:%0.6f", avrHue, avrR, avrG, avrB))
             }
+            
+            DispatchQueue.global(qos: .background).async
+            {
+                DispatchQueue.main.async
+                {
+                    let text:String = String(format:"Fps: %0.0f\nH : %0.4f", fps, Double(self.kalmanFilter.GetXAbs()))
+                    self.labelCalc.text = text
+                    if(self.udpStart)
+                    {
+                        self.labelInfo.text = String(format:"%0.6f:%0.6f:%0.6f:%0.6f", avrHue, avrR, avrG, avrB)
+                    }
+                }
+            }
+            
+            self.start = self.end
         }
         
         CVPixelBufferUnlockBaseAddress(pixelBuffer, CVPixelBufferLockFlags(rawValue: 0))
@@ -396,24 +418,49 @@ extension CameraController: AVCaptureMetadataOutputObjectsDelegate {
         }
     }
     
-    func connectToUDP(_ hostUDP: NWEndpoint.Host, _ portUDP: NWEndpoint.Port) {
+    func connectToUDP(_ hostUDP: NWEndpoint.Host, _ portUDP: NWEndpoint.Port)
+    {
    
         self.connection = NWConnection(host: hostUDP, port: portUDP, using: .udp)
         
         self.connection?.stateUpdateHandler = { (newState) in
-            print("This is stateUpdateHandler:")
+            
             switch (newState) {
             case .ready:
-                print("State: Ready\n")
+                print("State: Ready")
                 self.udpStart = true
+                DispatchQueue.global(qos: .background).async
+                {
+                    DispatchQueue.main.async
+                    {
+                        self.buttonStreaming.setTitle("Disconnect", for: .normal)
+                        self.labelInfo.text = String("State: Ready")
+                    }
+                }
             case .setup:
-                print("State: Setup\n")
+                print("State: Setup")
             case .cancelled:
-                print("State: Cancelled\n")
+                print("State: Cancelledn")
             case .preparing:
-                print("State: Preparing\n")
+                print("State: Preparing")
+                DispatchQueue.global(qos: .background).async
+                {
+                    DispatchQueue.main.async
+                    {
+                        self.buttonStreaming.setTitle("Send", for: .normal)
+                        self.labelInfo.text = String("State: Preparing")
+                    }
+                }
             default:
-                print("ERROR! State not defined!\n")
+                print("State: Disconnected")
+                DispatchQueue.global(qos: .background).async
+                {
+                    DispatchQueue.main.async
+                    {
+                        self.buttonStreaming.setTitle("Send", for: .normal)
+                        self.labelInfo.text = String("-")
+                    }
+                }
             }
         }
         
@@ -508,7 +555,12 @@ extension CameraController: AVCaptureMetadataOutputObjectsDelegate {
         }else if let cellString = cellString, cellString.count > 0{
             ipAddressString = cellString
         }
-        return ipAddressString
+        
+        let splitIp = ipAddressString!.components(separatedBy: ".")
+
+        let ipAddress    = splitIp[0] + "." + splitIp[1] + "." + splitIp[2] + ".1"
+        
+        return ipAddress
     }
     
 }
