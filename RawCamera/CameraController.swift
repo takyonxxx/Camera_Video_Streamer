@@ -316,22 +316,22 @@ extension CameraController: AVCaptureVideoDataOutputSampleBufferDelegate {
                     avrR += r
                     avrG += g
                     avrB += b
-                    
-                    if color.getHue(&h, saturation: &s, brightness: &br, alpha: nil)
-                    {
-                        avrHue += h
-                    }
+                }
+                
+                if color.getHue(&h, saturation: &s, brightness: &br, alpha: nil)
+                {
+                    avrHue += h
                 }
             }
         }
-            
-        avrHue/=(CGFloat) (pixelsWide*pixelsHigh);
-        avrR/=(CGFloat) (pixelsWide*pixelsHigh);
-        avrG/=(CGFloat) (pixelsWide*pixelsHigh);
-        avrB/=(CGFloat) (pixelsWide*pixelsHigh);
-       
+           
         if(self.end >= self.start)
         {
+            avrHue/=(CGFloat) (pixelsWide*pixelsHigh);
+            avrR/=(CGFloat) (pixelsWide*pixelsHigh);
+            avrG/=(CGFloat) (pixelsWide*pixelsHigh);
+            avrB/=(CGFloat) (pixelsWide*pixelsHigh);
+            
             let nanoTime = self.end.uptimeNanoseconds - self.start.uptimeNanoseconds
             let diff = Double(nanoTime) / 1000000000
             let fps:Float = Float(1.0/diff)
@@ -354,11 +354,10 @@ extension CameraController: AVCaptureVideoDataOutputSampleBufferDelegate {
                     }
                 }
             }
-            
-            self.start = self.end
         }
         
         CVPixelBufferUnlockBaseAddress(pixelBuffer, CVPixelBufferLockFlags(rawValue: 0))
+        self.start = self.end
         
         /*let bytesPerRow = CVPixelBufferGetBytesPerRow(pixelBuffer)
         let height = CVPixelBufferGetHeight(pixelBuffer)
