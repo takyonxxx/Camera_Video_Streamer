@@ -231,10 +231,10 @@ extension UIImage {
         
         let pixelInfo: Int = ((cgImage.bytesPerRow * Int(point.y)) + (Int(point.x) * bytesPerPixel))
         
-        let b = CGFloat(data[pixelInfo]) / CGFloat(255.0)
-        let g = CGFloat(data[pixelInfo+1]) / CGFloat(255.0)
-        let r = CGFloat(data[pixelInfo+2]) / CGFloat(255.0)
-        let a = CGFloat(data[pixelInfo+3]) / CGFloat(255.0)
+        let r = CGFloat(data[pixelInfo])
+        let g = CGFloat(data[pixelInfo+1])
+        let b = CGFloat(data[pixelInfo+2])
+        let a = CGFloat(data[pixelInfo+3])
         
         return UIColor(red: r, green: g, blue: b, alpha: a)
     }
@@ -332,25 +332,25 @@ extension CameraController: AVCaptureVideoDataOutputSampleBufferDelegate {
             avrG/=(CGFloat) (pixelsWide*pixelsHigh);
             avrB/=(CGFloat) (pixelsWide*pixelsHigh);
             
-            let nanoTime = self.end.uptimeNanoseconds - self.start.uptimeNanoseconds
-            let diff = Double(nanoTime) / 1000000000
-            let fps:Float = Float(1.0/diff)
-            self.kalmanFilter.Update(z_abs: Double(avrHue), var_z_abs: KF_VAR_MEASUREMENT, dt: diff)
+            let nanoTime = self.end.uptimeNanoseconds - self.start.uptimeNanoseconds;
+            let diff = Double(nanoTime) / 1000000000;
+            let fps:Float = Float(1.0/diff);
+            self.kalmanFilter.Update(z_abs: Double(avrHue), var_z_abs: KF_VAR_MEASUREMENT, dt: diff);
             
             if(udpStart)
             {
-               self.sendUDP(String(format:"%0.6f:%0.6f:%0.6f:%0.6f", avrHue, avrR, avrG, avrB))
+                self.sendUDP(String(format:"%0.3f:%0.1f:%0.1f:%0.1f", avrHue, avrR, avrG, avrB));
             }
             
             DispatchQueue.global(qos: .background).async
             {
                 DispatchQueue.main.async
                 {
-                    let text:String = String(format:"Fps: %0.0f\nH : %0.4f", fps, Double(self.kalmanFilter.GetXAbs()))
+                    let text:String = String(format:"Fps: %0.0f\nH : %0.3f\nR : %0.1f\nG : %0.1f                        \nB : %0.1f", fps, Double(self.kalmanFilter.GetXAbs()), avrR, avrG, avrB)
                     self.labelCalc.text = text
                     if(self.udpStart)
                     {
-                        self.labelInfo.text = String(format:"%0.6f:%0.6f:%0.6f:%0.6f", avrHue, avrR, avrG, avrB)
+                        self.labelInfo.text = String(format:"%0.3f:%0.1f:%0.1f:%0.1f", avrHue, avrR, avrG, avrB)
                     }
                 }
             }
@@ -522,8 +522,9 @@ extension CameraController: AVCaptureMetadataOutputObjectsDelegate {
                 let interface = ptr?.pointee
                 let addrFamily = interface?.ifa_addr.pointee.sa_family
                 if addrFamily == UInt8(AF_INET) || addrFamily == UInt8(AF_INET6) {
+                    let name: String = String(cString: (interface?.ifa_name)!)
                     
-                    if let name: String = String(cString: (interface?.ifa_name)!), (WIFI_IF.contains(name) || KNOWN_WIRED_IFS.contains(name) || KNOWN_CELL_IFS.contains(name)) {
+                    if (WIFI_IF.contains(name) || KNOWN_WIRED_IFS.contains(name) || KNOWN_CELL_IFS.contains(name)) {
                         
                         // String.fromCString() is deprecated in Swift 3. So use the following code inorder to get the exact IP Address.
                         var hostname = [CChar](repeating: 0, count: Int(NI_MAXHOST))

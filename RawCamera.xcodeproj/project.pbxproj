@@ -287,7 +287,7 @@
 				DEVELOPMENT_TEAM = X26P47BR28;
 				INFOPLIST_FILE = "$(SRCROOT)/RawCamera/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.biliyor.rawcamera;
+				PRODUCT_BUNDLE_IDENTIFIER = com.biliyor.glucometer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Off;
@@ -304,7 +304,7 @@
 				DEVELOPMENT_TEAM = X26P47BR28;
 				INFOPLIST_FILE = "$(SRCROOT)/RawCamera/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.biliyor.rawcamera;
+				PRODUCT_BUNDLE_IDENTIFIER = com.biliyor.glucometer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_SWIFT3_OBJC_INFERENCE = Off;
